@@ -1,0 +1,26 @@
+%%==================================================
+%% abstract.tex for BIT Master Thesis
+%% modified by yang yating
+%% version: 0.1
+%% last update: Dec 25th, 2016
+%%==================================================
+
+\begin{abstract}
+
+微内核将大部分系统服务运行在用户空间，相比于宏内核有更好的稳定性、扩展性和内核安全性，在微内核系统中，应用程序通过进程间通信(IPC)而非系统调用来请求服务，频繁的IPC造成的特权级切换将产生巨大开销，成为了系统的性能瓶颈。以seL4为代表的现代微内核将同步IPC作为主要通信手段，并以异步通知机制作为辅助手段来提升系统并发度，这些机制在一定程度上减少了IPC的开销，提升了系统性能，然而它们在设计上仍有三点不足：1）在支持同步IPC的情况下冗余地支持了异步通知机制，这违反了内核最小化原则；2）通知机制依赖内核的转发，会造成大量的特权级切换；3）系统调用和同步IPC会导致无关请求顺序执行，无法充分利用硬件资源。
+
+针对以上三点缺陷，本文设计并实现了ReL4——一套异步化的高性能微内核架构，其主要设计理念是将异步通知机制作为内核支持的唯一通信手段，在用户态通过共享缓冲区实现IPC的数据传递，并通过通知机制进行同步，保证了内核最小化原则；同时ReL4基于用户态中断，在兼容seL4接口的基础上，设计了无需内核转发的U-notification机制，避免了通知机造成的大量特权级切换；最后，ReL4通过异步运行时来实现异步IPC和异步系统调用，避免了无关IPC和系统调用请求的顺序执行，在充分利用硬件资源，提升系统并发度的同时，提升系统易用性。
+
+本文在FPGA上实现了ReL4的原型系统，将U-notification、异步IPC和异步系统调用分别与seL4进行了对比测试，并评估了真实的TCP Server在ReL4的性能表现。测试结果表明，相比于seL4，ReL4能够大幅减少系统中特权级切换的次数，在低并发场景下有着接近的性能，在高并发场景下拥有更卓越的表现，从而证明了ReL4架构的可行性和优越性。
+
+\keywords{微内核； 异步； 进程间通信； 用户态中断}
+\end{abstract}  
+
+\begin{englishabstract}
+With the advancement of technology, microkernels have been widely applied in industrial control systems, embedded systems, and other domains. Compared to monolithic kernels, microkernels separate functionalities such as memory management, device drivers, and file systems from the core kernel, running them in user space. This isolation mechanism ensures that failures in individual services do not directly impact the kernel or other services, thereby enhancing the overall stability of the system. By streamlining core functionalities, microkernels reduce the attack surface, thereby improving kernel security. Additionally, the modular design makes the system easier to maintain and upgrade. In microkernel systems, applications request services through inter-process communication (IPC) rather than system calls, which might have sufficed for early software with less performance sensitivity. However, in today’s context where higher software performance is demanded, frequent IPC-induced privilege-level switches incur significant overhead, becoming a performance bottleneck for the system.
+
+Modern microkernels, represented by seL4, employ synchronous IPC as the primary communication mechanism. They optimize IPC performance through a combination of system calls, fast-path optimizations, and better utilization of hardware parallelism, while simplifying concurrency models. seL4 supports asynchronous notification mechanisms within the kernel, which to some extent reduce IPC overhead and improve system performance. However, their design still has three shortcomings: 1) redundantly supporting asynchronous notification mechanisms alongside synchronous IPC violates the principle of minimality in kernel design; 2) the notification mechanism relies on kernel forwarding, resulting in numerous privilege-level switches; and 3) system calls and synchronous IPC cause unrelated requests to execute sequentially, failing to fully utilize hardware resources. To address these three limitations, this paper designs and implements ReL4—a high-performance, asynchronous microkernel architecture. To adhere to the principle of minimality, ReL4 supports only asynchronous notification mechanisms, with IPC implemented in user space through notifications and shared buffers. To avoid the excessive privilege-level switches caused by notification mechanisms, ReL4 introduces U-notification, a kernel-forwarding-free mechanism based on user-level interrupts, while maintaining compatibility with seL4’s interface. Finally, to prevent the sequential execution of unrelated IPC and system call requests, ReL4 employs an asynchronous runtime to implement asynchronous IPC and asynchronous system calls, better leveraging hardware resources and improving system concurrency. This paper implements a prototype of ReL4 on an FPGA and conducts comprehensive comparative tests with seL4. The results demonstrate that ReL4 exhibits significant advantages in reducing privilege-level switches and enhancing system concurrency.
+   
+\englishkeywords{microkernel; asynchronous; inter-process communication; user-mode interrupt }
+
+\end{englishabstract}
