@@ -7,3 +7,4 @@
 *.bbl
 *.synctex.gz
 *.blg
+.DS_Store
