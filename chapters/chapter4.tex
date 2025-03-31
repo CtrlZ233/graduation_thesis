@@ -17,24 +17,28 @@
         \hline 
         syscall & 参数 & 描述 \\
         \hline
-        UintrRegisterSender & ntfn\_cap & 注册通知发送端 \% \\
+        UintrRegisterSender & ntfn\_cap & 注册通知发送端 \ \\
         \hline
-        UintrRegisterReceiver & ntfn\_cap & 注册通知接收端 \% \\
+        UintrRegisterReceiver & ntfn\_cap & 注册通知接收端 \ \\
         \hline
-        UintrRegisterAsyncSyscall & ntfn\_cap, buffer\_cap & 注册异步系统调用处理协程 \% \\
+        UintrRegisterAsyncSyscall & ntfn\_cap, buffer\_cap & 注册异步系统调用处理协程 \ \\
         \hline
-        UintrWakeSyscallHandler & - & 唤醒系统调用处理协程 \% \\
+        UintrWakeSyscallHandler & - & 唤醒系统调用处理协程 \ \\
         \hline
     \end{tabular}
     \caption{ReL4中的新增系统调用}
     \label{tab:new_syscall}
 \end{table}
 
-如\ref{tab:new_syscall}所示，为了支持内核对U-notification的资源管理，ReL4新增了系统调用：UintrRegisterSender 和 UintrRegisterReceiver 用于申请相关的硬件资源，其参数是notification内核对象对应的Capbability。此外，为了支持异步系统调用，共享缓冲区也需要通过系统调用(UintrRegisterAsyncSyscall)注册给内核，内核还会为该线程注册处理缓冲区请求的内核协程。最后，内核提供一个用于唤醒系统调用处理协程的系统调用UintrWakeSyscallHandler。这些系统调用均由异步运行时代理调用，用户程序无需感知。
+如\ref{tab:new_syscall}所示，为了支持内核对U-notification的硬件资源管理，ReL4新增了系统调用：UintrRegisterSender 和 UintrRegisterReceiver 用于申请相关的硬件资源，其参数是notification内核对象对应的Capbability。内核会从UINTC中分配对应的硬件寄存器索引，并将对应的索引绑定到TCB中，资源的释放不需要额外的系统调用，当TCB或notification对象销毁时会自动释放掉硬件资源。
+
+此外，为了支持异步系统调用，共享缓冲区也需要通过系统调用(UintrRegisterAsyncSyscall)注册给内核，内核会为将共享缓冲区与TCB绑定，并为该线程注册处理该缓冲区请求的内核协程。最后，由于用户态中断不支持用户态直接通知内核态，内核提供一个用于唤醒系统调用处理协程的系统调用UintrWakeSyscallHandler，内核会将对应的处理协程唤醒，并找到一个空闲的CPU核心发送核间中断去抢占执行。
+
+为了对seL4进行兼容，这些系统调用均由异步运行时在初始化时进行调用，用户程序无需感知。
 
 \section{异步IPC}
 
-异步IPC作为ReL4中的主要的IPC方式，其实现依赖于异步运行时和U-notification。以IPC中最常见的Call为例，如\ref{fig:async_ipc}所示，客户端进程和服务端进程在双方建立连接时都会注册一个dispatcher协程用于不断从共享缓冲区中读取数据并进行处理。运行时库分别对服务端和客户端的dispatcher协程提供了两个默认实现，对于特殊的需求，用户程序可以通过运行时接口自定义dispatcher协程的行为。服务端的 dispatcher协程读取请求并处理后将响应写入环形缓冲区，并根据标志位判断是否发送U-notification，没有请求时阻塞自己并切换到其他worker协程。客户端的 dispatcher协程读取响应并唤醒响应的协程，没有响应时阻塞切换。
+异步IPC作为ReL4中的主要的IPC方式，其实现依赖于异步运行时和U-notification。以IPC中最常见的Call为例，如\ref{fig:async_ipc}所示，客户端进程和服务端进程在双方建立连接时，首先会想内核申请两条通道所占用的硬件资源，然后每个进程中的runtime会注册一个dispatcher协程并将绑定0号中断向量，用于在TAIC资源不够的情况下，用软件方式唤醒worker协程。服务端和客户端的worker协程则负责发起和处理请求，由runtime将数据写入共享缓冲区中。由于中断向量有限，runtime会尝试为每个worker协程分配中断向量，分配到中断向量的协程，其唤醒过程由TAIC完成，没有分配到中断向量的协程，其唤醒过程由dispatcher协程完成。
 
 \begin{figure*}[htbp]
     \centering
@@ -44,9 +48,9 @@
 
 Call的主要流程分为以下几个阶段：
 \begin{enumerate}
-    \item 客户端发起请求：用户态程序将以worker协程的形式发起IPC请求，异步运行时首先会根据请求的数据和协程的协程号生成 IPCItem 并写入请求的环形缓冲区中并将当前协程阻塞，然后检查缓冲区的 $req\_handler\_status$ 标志位，如果对方的dispatcher协程已经就绪，那客户端无需通知对方进程，对方进程的异步运行时会在某个时刻调度到dispatcher协程并处理请求。如果对方的dispatcher协程处于阻塞状态，则异步运行时会将$req\_handler\_status$ 标志位置位，并发送U-notification通知对方进程唤醒 dispatcher协程并重启调度。
-    \item 服务端处理请求并写回响应：服务端的dispatcher协程会在合适的时机读取出请求并进行解码和处理，然后根据处理结果构造响应的 IPCItem 并写入响应的环形缓冲区中，检查缓冲区中的 $req\_handler\_status$  标志位，如果客户端的响应 dispatcher协程就绪，则无需发起通知，否则需要发起U-notification通知客户端进程唤醒 dispatcher协程并重启调度。如果缓冲区内容为空，dispatcher协程会将 $req\_handler\_status$  标志位置空，并将自己阻塞。
-    \item 客户端处理响应：客户端的 dispatcher协程会在合适的时机读取响应并唤醒之前阻塞的协程，然后重启调度。
+    \item 客户端发起请求：用户态程序将以worker协程的形式发起IPC请求，异步运行时首先会尝试分配一个中断向量给worker协程，如果如果没有分配到，则复用dispatcher协程的0号中断，然后根据请求的数据和协程的协程号、中断号生成 IPCItem 并写入请求的环形缓冲区中并将当前协程阻塞，然后检查缓冲区的 $req\_handler\_status$ 标志位，如果对方的dispatcher协程已经就绪，那客户端无需通知对方进程，对方进程的异步运行时会在某个时刻调度到dispatcher协程并处理请求。如果对方的dispatcher协程处于阻塞状态，则异步运行时会将$req\_handler\_status$ 标志位置位，并发送U-notification通知对方进程唤醒 dispatcher协程并重启调度。
+    \item 服务端处理请求并写回响应：服务端的dispatcher协程会在合适的时机读取出请求并进行解码和处理，然后根据处理结果构造响应的 IPCItem 并写入响应的环形缓冲区中，如果中断号是0号协程，则runtime会检查缓冲区中的 $req\_handler\_status$  标志位后尝试唤醒客户端的 dispatcher协程，否则直接通过TAIC唤醒客户端的worker协程。如果缓冲区内容为空，dispatcher协程会将 $req\_handler\_status$  标志位置空，并将自己阻塞。
+    \item 客户端处理响应：客户端的 dispatcher协程会在合适的时机重新被调度并唤醒没有分配到TAIC资源的worker协程，唤醒后的worker协程会从缓冲区中读取响应并释放缓冲区资源。
 \end{enumerate}
 
 其伪代码如\ref{alg:async_ipc}所示。
@@ -63,13 +67,13 @@ Call的主要流程分为以下几个阶段：
     \SetKw{KwReturn}{return}
     
     \Prog{\Fn{async ipc\_call(cap, msg\_info) $\rightarrow$ Result<IPCItem>}}{
-        item = IPCItem::new(current\_cid(), msg\_info)\;
+        vec = get\_vec\_from\_pool()\;
+        item = IPCItem::new(vec, current\_cid(), msg\_info)\;
         buffer = get\_buffer\_from\_cap(cap)\;
         buffer.req\_ring\_buffer.write(item)\;
         \If{buffer.req\_co\_status == false}{
-            \tcp{设置标志位并通知对端}
             buffer.req\_co\_status = true\;
-            u\_notification\_signal(cap)\;
+            u\_notification\_signal(0)\;
         }
         \If{\KwLet \KwSome(reply) = \KwYield().\KwAwait}{
             \KwReturn \KwSome(reply)\;
@@ -85,7 +89,7 @@ Call的主要流程分为以下几个阶段：
                 buffer.resp\_ring\_buffer.write(reply)\;
                 \If{buffer.reply\_co\_status == false}{
                     buffer.reply\_co\_status = true\;
-                    u\_notification\_signal(cap)\;
+                    u\_notification\_signal(item.vec)\;
                 }
             }\Else{
                 buffer.req\_co\_status = false\;
@@ -98,7 +102,13 @@ Call的主要流程分为以下几个阶段：
 
 
 \section{异步系统调用}
-从广义的角度来看，异步系统调用是一类特殊的异步IPC，其接收方为内核。因此ReL4在内核中提供了一套相似的异步运行时以支持异步系统调用。异步系统调用与异步IPC的主要不同之处有两点：1) 由于接收端是内核，发送端无法使用U-notification去通知内核。2) 异步IPC中进程的异步调度器就是进程的执行主体，无需考虑异步任务的执行时机，而内核除了异步系统调用请求需要调度器执行，本身就有如中断、异常、任务调度等其他任务需要被执行。对于第一点，ReL4新增一个系统调用去用于唤醒相关的内核协程即可。而对于第二点，一个很简单的思路是每次时钟中断到来时去执行异步系统调用，然而这可能会导致空闲的CPU核心无法及时触发时钟中断而空转，因此，在不破坏原本的线程优先级调度前提下，ReL4使用核间中断来抢占空闲CPU核心或正在运行低优先级线程的CPU核心，更好地利用空闲CPU资源，减少响应时延。
+从广义的角度来看，异步系统调用是一类特殊的异步IPC，其接收方为内核。因此ReL4在内核中提供了一套相似的异步运行时以支持异步系统调用。异步系统调用与异步IPC的主要不同之处有两点：
+\begin{enumerate}
+    \item 由于接收端是内核，发送端无法使用U-notification去通知内核。
+    \item 异步IPC中进程的异步调度器就是进程的执行主体，无需考虑异步任务的执行时机，而内核除了异步系统调用请求需要调度器执行，本身就有如中断、异常、任务调度等其他任务需要被执行。
+\end{enumerate}
+
+对于第一点，ReL4新增一个系统调用去用于唤醒相关的内核协程即可。而对于第二点，一个很简单的思路是每次时钟中断到来时去执行异步系统调用，然而这可能会导致空闲的CPU核心无法及时触发时钟中断而空转，因此，在不破坏原本的线程优先级调度前提下，ReL4使用核间中断来抢占空闲CPU核心或正在运行低优先级线程的CPU核心，更好地利用空闲CPU资源，减少响应时延。
 
 为了避免破坏微内核中原本的优先级调度机制，ReL4在内核中对每个CPU核心维护了相应的执行优先级($exec\_prio$)，执行优先级区别于上文提到的运行时协程优先级，是由内核调度器维护的线程优先级。内核中的任务主要分为三类：
 \begin{enumerate}
@@ -138,7 +148,7 @@ Call的主要流程分为以下几个阶段：
             \If{current\_exec\_prio < exec\_prio} {
                 // 抢占低执行优先级的核心 \\
                 mask = 1 $\ll$ cpu\_id; \\
-                ipi\_send\_mask(mask, ASYNC\_SYSCALL\_HANDLE, mask); \\
+                ipi\_send\_mask(mask, ASYNC\_SYSCALL\_HANDLE); \\
             }
         }
     }
