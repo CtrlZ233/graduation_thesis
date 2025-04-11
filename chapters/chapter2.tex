@@ -34,7 +34,6 @@ seL4的设计遵循一下几个原则\cite{sel4DesignPrinciples}：
 
 \begin{table*}[htbp]
   \centering
-  \caption{seL4中的主要内核对象} \label{tab:kernel_object}
   \begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}}ll}
   \toprule
     内核对象			&作用	 \\
@@ -48,6 +47,7 @@ seL4的设计遵循一下几个原则\cite{sel4DesignPrinciples}：
     无类型对象（Untyped）&物理内存管理的承载者，通过系统调用转化为其他内核对象。 \\
   \bottomrule
   \end{tabular*}
+  \caption{seL4中的主要内核对象} \label{tab:kernel_object}
 \end{table*}
 
 内核对象无法直接被用户态访问，只能通过Capability机制将能力句柄（Capability handler）暴露给用户态，用户态在handler上调用系统调用来对内核对象进行访问。能力句柄是能力（Capability）的索引，在Capability中，内核维护了对应的内核对象地址以及对应的访问权限，当用户态在handler上发起系统调用时，内核会通过查找到相应的Capabiltiy并检查对应的权限，权限检查通过之后会根据地址对内核对象进行相应的操作。

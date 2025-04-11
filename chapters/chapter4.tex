@@ -155,6 +155,7 @@ Call的主要流程分为以下几个阶段：
 \end{algorithm}
 
 \section{兼容性讨论}
+\label{sec:rel4_comp}
 为了提升用户态程序的易用性，ReL4对seL4的程序提供一定的兼容性。ReL4中已经实现了seL4的基本系统调用并支持对称多处理机（SMP），但采用不同的通知机制和IPC设计和系统调用处理机制，因此有必要讨论这两部分的兼容性。
 
 \subsection{Notification与U-notification}
