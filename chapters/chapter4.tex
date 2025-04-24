@@ -17,22 +17,22 @@
         \hline 
         syscall & 参数 & 描述 \\
         \hline
-        UintrRegisterSender & ntfn\_cap & 注册通知发送端 \ \\
+        UNotificationRegisterSender & ntfn\_cap & 注册通知发送端 \ \\
         \hline
-        UintrRegisterReceiver & ntfn\_cap & 注册通知接收端 \ \\
+        UNotificationRegisterReceiver & ntfn\_cap & 注册通知接收端 \ \\
         \hline
-        UintrRegisterAsyncSyscall & ntfn\_cap, buffer\_cap & 注册异步系统调用处理协程 \ \\
+        RegisterAsyncSyscall & ntfn\_cap, buffer\_cap & 注册异步系统调用处理协程 \ \\
         \hline
-        UintrWakeSyscallHandler & - & 唤醒系统调用处理协程 \ \\
+        WakeAsyncSyscallHandler & - & 唤醒系统调用处理协程 \ \\
         \hline
     \end{tabular}
     \caption{ReL4中的新增系统调用}
     \label{tab:new_syscall}
 \end{table}
 
-如\ref{tab:new_syscall}所示，为了支持内核对U-notification的硬件资源管理，ReL4新增了系统调用：UintrRegisterSender 和 UintrRegisterReceiver 用于申请相关的硬件资源，其参数是notification内核对象对应的Capbability。内核会从UINTC中分配对应的硬件寄存器索引，并将对应的索引绑定到TCB中，资源的释放不需要额外的系统调用，当TCB或notification对象销毁时会自动释放掉硬件资源。
+如\ref{tab:new_syscall}所示，为了支持内核对U-notification的硬件资源管理，ReL4新增了系统调用：UNotificationRegisterSender 和 UNotificationRegisterReceiver 用于申请相关的硬件资源，其参数是notification内核对象对应的Capbability。内核会从UINTC和TAIC中分配对应的硬件资源索引，并将对应的索引绑定到TCB中，资源的释放不需要额外的系统调用，当TCB或notification对象销毁时会自动释放掉硬件资源。
 
-此外，为了支持异步系统调用，共享缓冲区也需要通过系统调用(UintrRegisterAsyncSyscall)注册给内核，内核会为将共享缓冲区与TCB绑定，并为该线程注册处理该缓冲区请求的内核协程。最后，由于用户态中断不支持用户态直接通知内核态，内核提供一个用于唤醒系统调用处理协程的系统调用UintrWakeSyscallHandler，内核会将对应的处理协程唤醒，并找到一个空闲的CPU核心发送核间中断去抢占执行。
+此外，为了支持异步系统调用，共享缓冲区也需要通过系统调用(RegisterAsyncSyscall)注册给内核，内核会为将共享缓冲区与TCB绑定，并为该线程注册处理该缓冲区请求的内核协程。最后，由于用户态中断不支持用户态直接通知内核态（TAIC支持），内核提供一个用于唤醒系统调用处理协程的系统调用WakeAsyncSyscallHandler，用户态根据硬件配置，如果不支持直接通知，则调用WakeAsyncSyscallHandler系统调用，否则直接发送中断将内核中对应的处理协程唤醒，并找到一个空闲的CPU核心发送核间中断去抢占执行。
 
 为了对seL4进行兼容，这些系统调用均由异步运行时在初始化时进行调用，用户程序无需感知。
 
@@ -42,21 +42,19 @@
 
 \begin{figure*}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{figures/async_ipc.drawio.pdf}
-    \caption{调度器的结构图}\label{fig:async_ipc}
+    \includegraphics[width=1.0\textwidth]{figures/async_ipc.drawio.pdf}
+    \caption{异步IPC流程示意图}\label{fig:async_ipc}
   \end{figure*}
 
 Call的主要流程分为以下几个阶段：
 \begin{enumerate}
-    \item 客户端发起请求：用户态程序将以worker协程的形式发起IPC请求，异步运行时首先会尝试分配一个中断向量给worker协程，如果如果没有分配到，则复用dispatcher协程的0号中断，然后根据请求的数据和协程的协程号、中断号生成 IPCItem 并写入请求的环形缓冲区中并将当前协程阻塞，然后检查缓冲区的 $req\_handler\_status$ 标志位，如果对方的dispatcher协程已经就绪，那客户端无需通知对方进程，对方进程的异步运行时会在某个时刻调度到dispatcher协程并处理请求。如果对方的dispatcher协程处于阻塞状态，则异步运行时会将$req\_handler\_status$ 标志位置位，并发送U-notification通知对方进程唤醒 dispatcher协程并重启调度。
-    \item 服务端处理请求并写回响应：服务端的dispatcher协程会在合适的时机读取出请求并进行解码和处理，然后根据处理结果构造响应的 IPCItem 并写入响应的环形缓冲区中，如果中断号是0号协程，则runtime会检查缓冲区中的 $req\_handler\_status$  标志位后尝试唤醒客户端的 dispatcher协程，否则直接通过TAIC唤醒客户端的worker协程。如果缓冲区内容为空，dispatcher协程会将 $req\_handler\_status$  标志位置空，并将自己阻塞。
+    \item 客户端发起请求：如\ref{alg:async_ipc_call}所示，用户态程序将以worker协程的形式发起IPC请求，异步运行时首先会尝试分配一个中断向量给worker协程，如果如果没有分配到，则复用dispatcher协程的0号中断，然后根据请求的数据和协程的协程号、中断号生成 IPCItem 并写入请求的环形缓冲区中并将当前协程阻塞，然后检查缓冲区的 $req\_handler\_status$ 标志位，如果对方的dispatcher协程已经就绪，那客户端无需通知对方进程，对方进程的异步运行时会在某个时刻调度到dispatcher协程并处理请求。如果对方的dispatcher协程处于阻塞状态，则异步运行时会将$req\_handler\_status$ 标志位置位，并发送U-notification通知对方进程唤醒 dispatcher协程并重启调度。
+    \item 服务端处理请求并写回响应：如\ref{async_ipc_reply}所示，服务端的dispatcher协程会在合适的时机读取出请求并进行解码和处理，然后根据处理结果构造响应的 IPCItem 并写入响应的环形缓冲区中，如果中断号是0号协程，则runtime会检查缓冲区中的 $req\_handler\_status$  标志位后尝试唤醒客户端的 dispatcher协程，否则直接通过TAIC唤醒客户端的worker协程。如果缓冲区内容为空，dispatcher协程会将 $req\_handler\_status$  标志位置空，并将自己阻塞。
     \item 客户端处理响应：客户端的 dispatcher协程会在合适的时机重新被调度并唤醒没有分配到TAIC资源的worker协程，唤醒后的worker协程会从缓冲区中读取响应并释放缓冲区资源。
 \end{enumerate}
 
-其伪代码如\ref{alg:async_ipc}所示。
-
 \begin{algorithm}[H]
-    \caption{异步IPC流程的伪代码}\label{alg:async_ipc}
+    \caption{发起异步IPC请求的伪代码}\label{alg:async_ipc_call}
     \SetKwFunction{Fn}{fn}
     \SetKwProg{Prog}{}{}{}
     \SetKw{KwAwait}{await}
@@ -65,33 +63,51 @@ Call的主要流程分为以下几个阶段：
     \SetKw{KwSome}{Some}
     \SetKw{KwErr}{Err}
     \SetKw{KwReturn}{return}
-    
+    // 发起异步IPC的worker协程 \\
     \Prog{\Fn{async ipc\_call(cap, msg\_info) $\rightarrow$ Result<IPCItem>}}{
         vec = get\_vec\_from\_pool()\;
         item = IPCItem::new(vec, current\_cid(), msg\_info)\;
         buffer = get\_buffer\_from\_cap(cap)\;
+        // 写入IPC请求 \\
         buffer.req\_ring\_buffer.write(item)\;
         \If{buffer.req\_co\_status == false}{
+            // 发送异步通知唤醒处理协程 \\
             buffer.req\_co\_status = true\;
             u\_notification\_signal(0)\;
         }
+        // 阻塞当前协程，等待响应唤醒 \\
         \If{\KwLet \KwSome(reply) = \KwYield().\KwAwait}{
             \KwReturn \KwSome(reply)\;
         }
         \KwReturn \KwErr(())\;
     }
-    
+\end{algorithm}
+
+\begin{algorithm}[H]
+    \caption{处理异步IPC请求的伪代码}\label{alg:async_ipc_reply}
+    \SetKwFunction{Fn}{fn}
+    \SetKwProg{Prog}{}{}{}
+    \SetKw{KwAwait}{await}
+    \SetKw{KwYield}{yield\_now}
+    \SetKw{KwLet}{let}
+    \SetKw{KwSome}{Some}
+    \SetKw{KwErr}{Err}
+    \SetKw{KwReturn}{return}
+    // 处理异步IPC请求的dispatcher协程 \\
     \Prog{\Fn{async ipc\_recv\_reply(cap)}}{
         buffer = get\_buffer\_from\_cap(cap)\;
         \While{true}{
             \If{\KwLet \KwSome(item) = buffer.req\_ring\_buffer.get()}{
                 reply = handle\_item(item)\;
+                // 写入IPC响应 \\
                 buffer.resp\_ring\_buffer.write(reply)\;
                 \If{buffer.reply\_co\_status == false}{
+                    // 发送异步通知唤醒对端协程 \\
                     buffer.reply\_co\_status = true\;
                     u\_notification\_signal(item.vec)\;
                 }
             }\Else{
+                // 没有其他请求，阻塞自身并切换到其他可执行的协程 \\
                 buffer.req\_co\_status = false\;
                 \KwYield().\KwAwait\;
             }
@@ -100,25 +116,23 @@ Call的主要流程分为以下几个阶段：
 \end{algorithm}
 
 
-
 \section{异步系统调用}
-从广义的角度来看，异步系统调用是一类特殊的异步IPC，其接收方为内核。因此ReL4在内核中提供了一套相似的异步运行时以支持异步系统调用。异步系统调用与异步IPC的主要不同之处有两点：
+
+从系统架构设计的角度来看，异步系统调用可以视为一类特殊的异步IPC通信过程，其特殊性主要体现在接收端为操作系统内核。为了支持这一特性，ReL4在内核层面实现了一套与用户态异步运行时相对应的内核态异步处理机制。通过对比分析异步系统调用与常规异步IPC的实现差异，我们发现以下两个关键区别需要特别处理：
+
+首先，在通知机制方面，由于内核作为接收端运行在特权级，而现有硬件架构中的用户态中断机制仅支持用户态间的通知传递，这使得发送端无法直接使用U-notification来唤醒内核。针对这一限制，ReL4通过引入专门的唤醒系统调用（WakeAsyncSyscallHandler）来建立用户态与内核态之间的通知通道，既保持了接口的统一性，又确保了系统功能的完备性。
+
+其次，在任务调度方面，内核环境具有更复杂的执行上下文。与用户态进程可以专注于处理异步IPC请求不同，内核还需要同时处理硬件中断、异常处理、线程调度等关键任务。这种多任务特性使得内核中的异步系统调用调度需要更精细的优先级管理策略。传统解决方案依赖时钟中断来触发异步请求处理，但这可能导致两个问题：1) 空闲CPU核心由于没有时钟中断触发而无法及时响应请求；2) 正在执行低优先级任务的CPU核心无法被及时抢占。为优化这一问题，ReL4创新性地采用了核间中断（IPI）机制来实现更灵活的调度唤醒，在保证系统实时性的同时提高CPU资源利用率。
+
+在具体实现上，ReL4设计了一个分层的优先级调度框架来协调各类内核任务的执行顺序。该框架为每个CPU核心维护一个动态的执行优先级（exec\_prio），其取值反映了当前执行任务的紧急程度：
+
 \begin{enumerate}
-    \item 由于接收端是内核，发送端无法使用U-notification去通知内核。
-    \item 异步IPC中进程的异步调度器就是进程的执行主体，无需考虑异步任务的执行时机，而内核除了异步系统调用请求需要调度器执行，本身就有如中断、异常、任务调度等其他任务需要被执行。
+    \item 空闲状态（exec\_prio=256）：当CPU核心运行空闲线程时处于最低优先级，可随时被更高优先级的异步请求抢占；
+    \item 内核关键任务（exec\_prio=0）：处理中断、异常等不可抢占的核心功能时处于最高优先级；
+    \item 用户态任务（exec\_prio=thread\_priority）：执行用户程序时采用对应线程的优先级，支持有限度的抢占。
 \end{enumerate}
 
-对于第一点，ReL4新增一个系统调用去用于唤醒相关的内核协程即可。而对于第二点，一个很简单的思路是每次时钟中断到来时去执行异步系统调用，然而这可能会导致空闲的CPU核心无法及时触发时钟中断而空转，因此，在不破坏原本的线程优先级调度前提下，ReL4使用核间中断来抢占空闲CPU核心或正在运行低优先级线程的CPU核心，更好地利用空闲CPU资源，减少响应时延。
-
-为了避免破坏微内核中原本的优先级调度机制，ReL4在内核中对每个CPU核心维护了相应的执行优先级($exec\_prio$)，执行优先级区别于上文提到的运行时协程优先级，是由内核调度器维护的线程优先级。内核中的任务主要分为三类：
-\begin{enumerate}
-  \item idle thread: 空闲CPU核心执行idle线程，此时CPU核心的执行优先级为256，属于最低的执行优先级。
-  \item 内核态任务：正在处理中断、异常、系统调用等，此时CPU核心的执行优先级为0，最高优先级，不可被抢占。
-  \item 用户态任务：正在执行用户态的任务，此时CPU核心的执行优先级为当前线程的优先级，可以被更高优先级线程提交的异步系统调用请求打断。
-\end{enumerate}
-
-
-当发送端通过系统调用陷入内核去唤醒相应协程后，会检查当前线程的优先级是否可以抢占其他CPU核心，如果可以，则发送核间中断抢占该CPU核心去执行异步系统调用，当前CPU核心则返回用户态继续执行其他协程。如果没有可以被抢占的CPU核心，则在下一次时钟中断到来时执行异步系统调用请求，其伪代码\ref{alg:wake_syscall_handler}所示：
+当用户态发起异步系统调用时，唤醒流程如算法\ref{alg:wake_syscall_handler}所示：首先通过系统调用陷入内核，然后调度器会检查当前系统状态，优先选择空闲CPU核心或可抢占的低优先级CPU核心（通过IPI）来立即处理请求。若无合适核心可用，则延迟到下次时钟中断处理。这种设计既保证了关键内核任务的优先执行，又最大限度地减少了异步系统调用的响应延迟，实现了安全性与性能的平衡。
 
 \lstdefinelanguage{rust}{
     keywords={fn, if, let, Some, as, in},
@@ -142,8 +156,10 @@ Call的主要流程分为以下几个阶段：
     \Prog{\Fn{wake\_syscall\_handler()}}{
         current = get\_current\_thread(); \\
         \If{let Some(cid) = current.async\_sys\_handler\_cid} {
+            // 将处理协程加入就绪队列 \\
             coroutine\_wake(cid); \\
             current\_exec\_prio = current.tcb\_prio; \\
+            // 获取CPU核心中最低的执行优先级 \\
             (cpu\_id, exec\_prio) = get\_max\_exec\_prio(); \\
             \If{current\_exec\_prio < exec\_prio} {
                 // 抢占低执行优先级的核心 \\
@@ -179,7 +195,7 @@ Call的主要流程分为以下几个阶段：
 
 异步IPC通过异步运行时可以在基本通信场景下上实现API级别的兼容，然而seL4中的同步IPC还有额外的能力：
 \begin{enumerate}
-  \item 	错误处理：同步IPC可以用于缺页异常等处理，seL4通过在TCB中维护一个Endpoint对象来发送错误信息给用户态程序进行处理，而在ReL4中，TCB中将维护对应的U-notification对象，以及对应的共享缓冲区指针，当异常和错误发生时，将错误信息写入共享缓冲区，并发送U-notification通知用户态程序。此场景下依然可以实现API级别的兼容。
+  \item 错误处理：同步IPC可以用于缺页异常等处理，seL4通过在TCB中维护一个Endpoint对象来发送错误信息给用户态程序进行处理，而在ReL4中，TCB中将维护对应的U-notification对象，以及对应的共享缓冲区指针，当异常和错误发生时，将错误信息写入共享缓冲区，并发送U-notification通知用户态程序。此场景下依然可以实现API级别的兼容。
   \item 能力派生：seL4中的同步IPC拥有能力派生与传递的功能，虽然内核已经支持了Capability Space相关的系统调用，同步IPC使得能力传递更加灵活。而由于异步IPC不经过内核，因此ReL4中不再支持通过IPC来进行能力派生，仅通过系统调用进行能力派生，损失了一部分灵活性，保留了功能的完整性。
 \end{enumerate}
 
@@ -187,7 +203,7 @@ Call的主要流程分为以下几个阶段：
 
 综上所述，异步IPC在大部分情况下依然能实现API级别的兼容。
 
-\subsection{同步系统调用于异步系统调用}
+\subsection{同步系统调用与异步系统调用}
 与异步IPC类似，异步系统调用的发起依然以协程为单位进行，但与同步系统调用的处理不同，为了充分利用CPU硬件，异步系统调用的处理采用多核心、抢占式处理，如果系统中存在空闲核心或执行低优先级任务的核心，异步系统调用会抢占该核心并处理系统调用请求，因此系统调用的发起和处理有可能是多核心且并行的。
 
 此外，有两类系统调用无法异步化：
@@ -198,3 +214,9 @@ Call的主要流程分为以下几个阶段：
 
 对于上述两类，我们通过异步运行时中的API兼容层进行自动判断，对于无法异步化的系统调用，运行时将自动转化为同步系统调用进行处理。综上所述，异步系统调用可以实现API级别的兼容。
 
+\section{本章小结}
+本章系统性地阐述了ReL4微内核的设计实现与兼容性架构。作为面向RISC-V平台的新型异步微内核，ReL4在保持与seL4功能兼容的基础上，通过创新性的系统架构设计，实现了显著的性能优化。
+
+在核心机制方面，ReL4提出了一种基于硬件加速的异步通信框架。通过引入U-notification机制，系统有效降低了传统通知机制带来的上下文切换开销。异步IPC的设计充分利用了现代处理器的多核特性，采用共享缓冲区与协程调度相结合的方式，实现了高效的进程间通信。特别地，针对异步系统调用的处理，ReL4创新性地采用了执行优先级调度策略，通过核间中断实现智能的任务抢占，在保证系统实时性的同时提高了CPU资源利用率。
+
+在兼容性设计上，ReL4展现了良好的系统架构适应性。通过构建多层次的兼容层，系统既保留了seL4原有的API接口语义，又充分发挥了异步架构的性能优势。实验评估表明，这种设计在确保原有应用程序可移植性的前提下，能够显著提升系统的整体性能。后续章节将通过详尽的实验数据，进一步验证这些设计决策的有效性及其对系统性能的影响。
