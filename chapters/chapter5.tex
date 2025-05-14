@@ -4,9 +4,10 @@
 %% version: 0.1
 %% last update: Dec 25th, 2016
 %%==================================================
-\chapter{实验评估}
+\chapter{ReL4实验评估}
 \begin{table}
     \centering
+    \caption{实验平台信息}
     \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{5cm}|}
     \hline
     FPGA & \multicolumn{2}{c|}{Zynq UltraScale + XCZU15EG-2FFVB1156 MPSoC} \\ \cline{2-3} 
@@ -15,7 +16,6 @@
     Operating System & \multicolumn{2}{c|}{ReL4} \\ \hline
     Network Stack & \multicolumn{2}{c|}{smoltcp} \\ \hline
     \end{tabular}
-    \caption{实验平台信息}
     \label{tab:platform_info}
     \end{table}
 
@@ -55,6 +55,7 @@ ReL4的功能验证工作主要基于seL4微内核的官方测试框架seL4test\
 
 \begin{table*}[htbp]
     \centering
+    \caption{ReL4在seL4test的测试情况} 
     \begin{tabular*}{1.0\textwidth}{@{\extracolsep{\fill}}lll}
     \toprule
     测试套			&通过情况 &说明	 \\
@@ -70,7 +71,7 @@ ReL4的功能验证工作主要基于seL4微内核的官方测试框架seL4test\
       其他非单一功能测试 & 36/36 & 针对调用了上述不兼容特性的测例进行了修改，见\ref{sec:rel4_comp} \\
     \bottomrule
     \end{tabular*}
-    \caption{ReL4在seL4test的测试情况} \label{tab:seL4_test_info}
+    \label{tab:seL4_test_info}
   \end{table*}
 
 \section{性能测试}
@@ -82,7 +83,7 @@ ReL4的功能验证工作主要基于seL4微内核的官方测试框架seL4test\
 
 进程间通信性能是微内核系统的关键指标。我们采用典型的Ping-Pong测试方法，测量了不同并发度、不同CPU核心数下、不同硬件资源下的平均IPC开销。
 
-为验证系统在实际应用中的表现，我们构建了高并发TCP服务器基准测试。该测试模拟了真实网络环境中的连接建立、数据传输等典型操作。网络协议栈以进程的形式运行，服务器通过IPC请求服务，
+为验证系统在实际应用中的表现，我们构建了高并发TCP服务器基准测试。该测试模拟了真实网络环境中的连接建立、数据传输等典型操作。网络协议栈以进程的形式运行，服务器通过IPC请求系统服务。
 
 下面将详细介绍本节的实验设计方案结实验结果。
 

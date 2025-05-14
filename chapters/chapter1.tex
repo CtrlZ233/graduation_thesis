@@ -42,6 +42,7 @@
 特权级切换带来的性能开销可分解为直接和间接两个部分\cite{li2007quantifying}。直接开销主要体现为上下文保存与恢复所需的额外指令执行周期，而间接开销则源于地址空间切换导致的缓存污染效应\cite{gotzfried2017cache}，这种效应会显著降低后续指令的执行效率。如表\ref{tab:seL4_call_cost}所示，基于FPGA平台的实测数据表明，在seL4微内核中执行一次Call IPC操作时，地址空间切换所产生的时间开销占比最高，其次是上下文切换和fast-path检查过程。特别值得注意的是，当fast-path检查未通过时，系统将转入slow-path处理流程，该流程涉及更复杂的消息解码和任务调度机制，会进一步加剧IPC性能的下降。针对这一关键性能瓶颈问题，学术界和工业界已从硬件架构优化和软件算法改进等多个维度展开了广泛而深入的研究探索。
 \begin{table}
     \centering
+    \caption{seL4一次IPC中各操作的开销占比}
     \begin{tabular}{|c|c|}
         \hline 
         操作 & 占比 \\
@@ -57,7 +58,6 @@
         其他 & 4.5\% \\
         \hline
     \end{tabular}
-    \caption{seL4一次IPC中各操作的开销占比}
     \label{tab:seL4_call_cost}
 \end{table}
     
@@ -69,36 +69,36 @@
 
 \begin{table}
     \centering
+    \caption{国内外研究现状汇总}
     \resizebox{\textwidth}{!}{ % \textwidth 表示文本宽度，! 表示保持宽高比
     \begin{tabular}{|c|c|c|c|}
         \hline
         \textbf{优化方法} & \textbf{详细分类} & \textbf{实例} & \textbf{缺点} \\
         \hline
-        \multirow{3}{*}{减少内核路径} & 临时地址映射 & [3] & \multirow{3}{*}{上下文切换开销已经成为性能瓶颈} \\
+        \multirow{3}{*}{减少内核路径} & 临时地址映射 & \cite{liedtke1993improving} & \multirow{3}{*}{上下文切换开销已经成为性能瓶颈} \\
         \cline{2-3}
-         & 快速路径 & \multirow{2}{*}{[3, 4, 24, 25, 26]} & \\
+         & 快速路径 & \multirow{2}{*}{\cite{liedtke1993improving, klein2009sel4, heiser2010okl4, smejkal2015transactional}} & \\
         \cline{2-2}
          & 消息寄存器 & & \\
         \hline
-        \multirow{5}{*}{减少上下文切换开销} & 消息寄存器 & \multirow{2}{*}{[3, 4, 24, 25, 26]} & \multirow{3}{*}{无法从根本上消除切换开销} \\
+        \multirow{5}{*}{减少上下文切换开销} & 消息寄存器 & \multirow{2}{*}{\cite{liedtke1993improving, klein2009sel4, heiser2010okl4, smejkal2015transactional}} & \multirow{4}{*}{无法从根本上消除切换开销} \\
         \cline{2-2} \cline{4-4}
          & 组合系统调用 & & \\
         \cline{2-3}
-         & ASID机制 & [4] & \\
+         & ASID机制 & \cite{klein2009sel4} & \\
         \cline{2-4}
-         & 统一地址空间 & [13, 14, 15, 16, 17, 18] & \multirow{2}{*}{与微内核设计理念相悖，无法有效地实施到微内核中} \\
+         & 统一地址空间 & \cite{kuo2020linux, olivier2019binary, yu2017web, zhou2023userspace, jeong2014mtcp, yang2017spdk} & \multirow{2}{*}{与微内核设计理念相悖，无法有效地实施到微内核中} \\
         \cline{2-3}
-         & 批量系统调用 & [19] & \\
+         & 批量系统调用 & \cite{soares2010flexsc} & \\
         \hline
-        \multirow{3}{*}{硬件优化} & 虚拟化指令 & [11] & 仅适用于虚拟化环境 \\
+        \multirow{3}{*}{硬件优化} & 虚拟化指令 & \cite{mi2019skybridge} & 仅适用于虚拟化环境 \\
         \cline{2-4}
-         & \multirow{2}{*}{直接硬件辅助} & [12] & 没有硬件标准，没有通用硬件的支持 \\
+         & \multirow{2}{*}{直接硬件辅助} & \cite{du2019xpc} & 没有硬件标准，没有通用硬件的支持 \\
         \cline{3-4}
-         & & 用户态中断 & --- \\
+         & & \cite{mehta2021x86, pintouser} & --- \\
         \hline
         \end{tabular}
     }
-    \caption{国内外研究现状汇总}
     \label{tab:optimization_methods}
 \end{table}
 

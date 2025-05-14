@@ -4,21 +4,43 @@
 %% version: 0.1
 %% last update: Dec 25th, 2016
 %%==================================================
+@article{smejkal2015transactional,
+  title={Transactional ipc in fiasco. oc},
+  author={Smejkal, Till and Lackorzynski, Adam and Engel, Benjamin and V{\"o}lp, Marcus},
+  journal={OSPERT 2015},
+  volume={19},
+  year={2015}
+}
+
+@inproceedings{heiser2010okl4,
+  title={The OKL4 Microvisor: Convergence point of microkernels and hypervisors},
+  author={Heiser, Gernot and Leslie, Ben},
+  booktitle={Proceedings of the first ACM asia-pacific workshop on Workshop on systems},
+  pages={19--24},
+  year={2010},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+}
 
 @misc{sel4-sel4test,
-  author = {{seL4 Project}},
+  author = {{seL4 Project Contributors}},
   year = {2023},
   title = {{seL4/sel4test: Test suite for seL4}},
   howpublished = {\url{https://github.com/seL4/sel4test}},
-  note = {Accessed: 2025-05-06}
+  note = {Accessed: 2025-05-06},
+  publisher = {GitHub, Inc.},
+  address = {San Francisco, California, USA}
 }
 
+
 @misc{smoltcp-rs-smoltcp,
-  author = {{smoltcp-rs}},
+  author = {{smoltcp-rs Development Team}},
   year = {2023},
   title = {{smoltcp: a smol tcp/ip stack}},
   howpublished = {\url{https://github.com/smoltcp-rs/smoltcp}},
-  note = {Accessed: 2025-05-06}
+  note = {Accessed: 2025-05-06},
+  publisher = {GitHub, Inc.},
+  address = {San Francisco, California, USA}
 }
 
 @misc{amd-axi-dma-controller,
@@ -26,7 +48,9 @@
   title = {{AXI DMA Controller}},
   year = {2023},
   howpublished = {\url{https://www.amd.com/zh-cn/products/adaptive-socs-and-fpgas/intellectual-property/axi_dma.html}},
-  note = {Accessed: 2025-05-06}
+  note = {Accessed: 2025-05-06},
+  publisher = {AMD},  
+  address = {Santa Clara, California, USA}
 }
 
 @misc{axima-power-axinet,
@@ -34,7 +58,9 @@
   year = {2023},
   title = {{AXINET | Axima-power.com}},
   howpublished = {\url{https://www.axima-power.com/axinet}},
-  note = {Accessed: 2025-05-06}
+  note = {Accessed: 2025-05-06},
+  publisher = {Axima Power},
+  address = {Hamburg, Germany}
 }
 
 @misc{opensbi,
@@ -42,19 +68,23 @@
   title = {{RISC-V Open Source Supervisor Binary Interface (OpenSBI)}},
   year = {2023},
   howpublished = {\url{https://github.com/riscv-software-src/opensbi}},
-  note = {Accessed: 2025-05-06}
+  note = {Accessed: 2025-05-06},
+  publisher    = {RISC-V International},
+  address      = {Berkeley, CA, USA}
 }
 
 @misc{arm2023axi,
   title={AMBA AXI and ACE Protocol Specification},
   organization={ARM Limited},
-  year={2023}
+  year={2023},
+  address = {Cambridge, UK},
 }
 
 @misc{xilinx2023zynq,
   title={Zynq UltraScale+ MPSoC Technical Reference Manual},
   organization={Xilinx Inc.},
-  year={2023}
+  year={2023},
+  address = {San Jose, CA, USA}
 }
 
 @inproceedings{barnes1993method,
@@ -62,7 +92,9 @@
   author={Barnes, Greg},
   booktitle={Proceedings of the fifth annual ACM symposium on Parallel algorithms and architectures},
   pages={261--270},
-  year={1993}
+  year={1993},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{peters2015microkernel,
@@ -70,7 +102,9 @@
   author={Peters, Sean and Danis, Adrian and Elphinstone, Kevin and Heiser, Gernot},
   booktitle={Proceedings of the 6th Asia-Pacific Workshop on Systems},
   pages={1--7},
-  year={2015}
+  year={2015},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{lyons2018scheduling,
@@ -78,7 +112,9 @@
   author={Lyons, Anna and McLeod, Kent and Almatary, Hesham and Heiser, Gernot},
   booktitle={Proceedings of the Thirteenth EuroSys Conference},
   pages={1--16},
-  year={2018}
+  year={2018},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{de2024sel4,
@@ -151,21 +187,28 @@
   author={Waterman, Andrew and Asanovi{\'c}, Krste},
   volume={1},
   year={2016},
-  publisher={UCB EECS-2016-1}
+  publisher={UCB EECS-2016-1},
+  address      = {Berkeley, CA, USA},
 }
+
 
 @misc{rust2021std,
-  title={Rust standard library futures},
-  author={Rust Developers},
-  year={2021},
-  howpublished={\url{https://doc.rust-lang.org/std/future}}
+  title        = {Rust Standard Library Futures Module},
+  author       = {The Rust Project Developers},
+  year         = {2021},
+  howpublished = {\url{https://doc.rust-lang.org/std/future/}},
+  note         = {Accessed: 2023-01-01},
+  publisher    = {The Rust Foundation},
+  address      = {San Francisco, CA, USA}, 
 }
 
-
-@misc{moslehianexperimental,
-  title={An Experimental Integration of io uring and Tokio: An Asynchronous Runtime for Rust},
-  author={Moslehian, Arash Sal},
-  school={Ferdowsi University of Mashhad}
+@techreport{moslehianexperimental,
+  title      = {An Experimental Integration of io\_uring and Tokio: An Asynchronous Runtime for Rust},
+  author     = {Moslehian, Arash Sal},
+  institution = {Ferdowsi University of Mashhad},
+  year       = {2022},
+  note       = {Accessed: 2024-03-02},
+  address    = {Mashhad, Iran},
 }
 
 @book{klabnik2020rust,
@@ -176,17 +219,29 @@
 }
 
 @misc{tjader2021rtic,
-  title={RTIC-A Zero-Cost Abstraction for Memory Safe Concurrency},
-  author={Tj{\"a}der, Henrik},
-  year={2021}
+  title        = {RTIC - A Zero-Cost Abstraction for Memory-Safe Concurrency},
+  author       = {Tj{\"a}der, Henrik},
+  year         = {2021},
+  note         = {Accessed: 2023-01-01},
+  publisher    = {arXiv},
+  address      = {Ithaca, NY, USA},
 }
 
 @inproceedings{edwards2009coherent,
-  title={Coherent reaction},
-  author={Edwards, Jonathan},
-  booktitle={Proceedings of the 24th ACM SIGPLAN conference companion on Object oriented programming systems languages and applications},
-  pages={925--932},
-  year={2009}
+  author = {Edwards, Jonathan},
+  title = {Coherent reaction},
+  year = {2009},
+  isbn = {9781605587684},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/1639950.1640058},
+  abstract = {Side effects are both the essence and bane of imperative programming. The programmer must carefully coordinate actions to manage their side effects upon each other. Such coordination is complex, error-prone, and fragile. Coherent reaction is a new model of change-driven computation that coordinates effects automatically. State changes trigger events called reactions that in turn change other states. A coherent execution order is one in which each reaction executes before any others that are affected by its changes. A coherent order is discovered iteratively by detecting incoherencies as they occur and backtracking their effects. Unlike alternative solutions, much of the power of imperative programming is retained, as is the common sense notion of mutable state. Automatically coordinating actions lets the programmer express what to do, not when to do it.Coherent reactions are embodied in the Coherence language, which is specialized for interactive applications like those common on the desktop and web. The fundamental building block of Coherence is the dynamically typed mutable tree. The fundamental abstraction mechanism is the virtual tree, whose value is lazily computed, and whose behavior is generated by coherent reactions.},
+  booktitle = {Proceedings of the 24th ACM SIGPLAN Conference Companion on Object Oriented Programming Systems Languages and Applications},
+  pages = {925–932},
+  numpages = {8},
+  keywords = {bidirectional functions, functional reactive programming, interactive systems, reactive systems, synchronous reactive programming, trees},
+  location = {Orlando, Florida, USA},
+  series = {OOPSLA '09}
 }
 
 @book{samson2024asynchronous,
@@ -234,7 +289,9 @@
   author={Deligiannis, Pantazis and Donaldson, Alastair F and Ketema, Jeroen and Lal, Akash and Thomson, Paul},
   booktitle={Proceedings of the 36th ACM SIGPLAN Conference on Programming Language Design and Implementation},
   pages={154--164},
-  year={2015}
+  year={2015},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{adya2002cooperative,
@@ -242,15 +299,28 @@
   author={Adya, Atul and Howell, Jon and Theimer, Marvin and Bolosky, William J and Douceur, John R},
   booktitle={USENIX Annual Technical Conference, General Track},
   pages={289--302},
-  year={2002}
+  year={2002},
+  publisher = {USENIX Association},
+  address = {USA},
 }
 
 @article{rights2005software,
-  title={Software and the Concurrency Revolution},
-  author={Rights, First Worldwide Serial and Rights, Nonexclusive Reprint and Sutter, Herb and Larus, James},
-  year={2005},
-  publisher={Citeseer}
+  author = {Sutter, Herb and Larus, James},
+  title = {Software and the Concurrency Revolution: Leveraging the full power of multicore processors demands new tools and new thinking from the software industry.},
+  year = {2005},
+  issue_date = {September 2005},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  volume = {3},
+  number = {7},
+  issn = {1542-7730},
+  doi = {10.1145/1095408.1095421},
+  journal = {Queue},
+  month = sep,
+  pages = {54–62},
+  numpages = {9}
 }
+
 
 @article{li2015reducing,
   title={Reducing world switches in virtualized environment with flexible cross-world calls},
@@ -268,7 +338,9 @@
   author={G{\"o}tzfried, Johannes and Eckert, Moritz and Schinzel, Sebastian and M{\"u}ller, Tilo},
   booktitle={Proceedings of the 10th European Workshop on Systems Security},
   pages={1--6},
-  year={2017}
+  year={2017},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{li2007quantifying,
@@ -276,7 +348,9 @@
   author={Li, Chuanpeng and Ding, Chen and Shen, Kai},
   booktitle={Proceedings of the 2007 workshop on Experimental computer science},
   pages={2--es},
-  year={2007}
+  year={2007},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @article{peng2020fast,
@@ -301,7 +375,9 @@
   booktitle={Euro-Par 2013 Parallel Processing: 19th International Conference, Aachen, Germany, August 26-30, 2013. Proceedings 19},
   pages={620--632},
   year={2013},
-  organization={Springer}
+  organization={Springer},
+  publisher = {Springer-Verlag},
+  address = {Berlin, Heidelberg},
 }
 
 @article{cox2017efficient,
@@ -332,11 +408,18 @@
 }
 
 @inproceedings{heiser2008role,
-  title={The role of virtualization in embedded systems},
-  author={Heiser, Gernot},
-  booktitle={Proceedings of the 1st workshop on Isolation and integration in embedded systems},
-  pages={11--16},
-  year={2008}
+author = {Heiser, Gernot},
+title = {The role of virtualization in embedded systems},
+year = {2008},
+isbn = {9781605581262},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+doi = {10.1145/1435458.1435461},
+booktitle = {Proceedings of the 1st Workshop on Isolation and Integration in Embedded Systems},
+pages = {11–16},
+numpages = {6},
+location = {Glasgow, Scotland},
+series = {IIES '08}
 }
 
 @article{rana2023survey,
@@ -368,11 +451,18 @@
 }
 
 @inproceedings{liedtke1993improving,
-  title={Improving IPC by kernel design},
-  author={Liedtke, Jochen},
-  booktitle={Proceedings of the fourteenth ACM symposium on Operating systems principles},
-  pages={175--188},
-  year={1993}
+author = {Liedtke, Jochen},
+title = {Improving IPC by kernel design},
+year = {1993},
+isbn = {0897916328},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+doi = {10.1145/168619.168633},
+booktitle = {Proceedings of the Fourteenth ACM Symposium on Operating Systems Principles},
+pages = {175–188},
+numpages = {14},
+location = {Asheville, North Carolina, USA},
+series = {SOSP '93}
 }
 
 @inproceedings{klein2009sel4,
@@ -380,15 +470,20 @@
   author={Klein, Gerwin and Elphinstone, Kevin and Heiser, Gernot and Andronick, June and Cock, David and Derrin, Philip and Elkaduwe, Dhammika and Engelhardt, Kai and Kolanski, Rafal and Norrish, Michael and others},
   booktitle={Proceedings of the ACM SIGOPS 22nd symposium on Operating systems principles},
   pages={207--220},
-  year={2009}
+  year={2009},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @misc{Caruso2021,
-    author = {Jeff Caruso},
-    title = {1 million IOPS demonstrated},
-    howpublished = {\url{https://www.networkworld.com/article/2244085/1-million- iops-demonstrated.html}},
-    note = {Accessed: 2021-12-01},
-    year = {2021}
+    author       = {Jeff Caruso},
+    title        = {1 million IOPS demonstrated},
+    howpublished = {\url{https://www.networkworld.com/article/2244085/1-million-iops-demonstrated.html}},
+    note         = {Accessed: 2021-12-01},
+    year         = {2021},
+    publisher    = {Network World},
+    address      = {Framingham, MA, USA},
+    urldate      = {2021-12-01}
 }
 
 @article{lipp2020meltdown,
@@ -414,11 +509,14 @@
 }
 
 @misc{kernel_pti,
-  author = {The kernel development community},
-  title = {Page table isolation(PTI)},
+  author       = {The kernel development community},
+  title        = {Page table isolation (PTI)},
   howpublished = {\url{https://www.kernel.org/doc/html/latest/x86/pti.html}},
-  note = {Accessed: 2021-12-01},
-  year = {2021}
+  note         = {Accessed: 2021-12-01},
+  year         = {2021},
+  publisher    = {The Linux Kernel Organization},
+  address      = {Portland, OR, USA}, 
+  urldate      = {2021-12-01}
 }
 
 @inproceedings{blackham2012improving,
@@ -426,7 +524,9 @@
   author={Blackham, Bernard and Shi, Yao and Heiser, Gernot},
   booktitle={Proceedings of the 7th ACM european conference on Computer Systems},
   pages={323--336},
-  year={2012}
+  year={2012},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @article{heiser2016l4,
@@ -445,7 +545,9 @@
   author={Mi, Zeyu and Li, Dingji and Yang, Zihan and Wang, Xinran and Chen, Haibo},
   booktitle={Proceedings of the Fourteenth EuroSys Conference 2019},
   pages={1--15},
-  year={2019}
+  year={2019},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{du2019xpc,
@@ -453,7 +555,9 @@
   author={Du, Dong and Hua, Zhichao and Xia, Yubin and Zang, Binyu and Chen, Haibo},
   booktitle={Proceedings of the 46th International Symposium on Computer Architecture},
   pages={671--684},
-  year={2019}
+  year={2019},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{kuo2020linux,
@@ -461,7 +565,9 @@
   author={Kuo, Hsuan-Chi and Williams, Dan and Koller, Ricardo and Mohan, Sibin},
   booktitle={Proceedings of the Fifteenth European Conference on Computer Systems},
   pages={1--15},
-  year={2020}
+  year={2020},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{olivier2019binary,
@@ -469,16 +575,22 @@
   author={Olivier, Pierre and Chiba, Daniel and Lankes, Stefan and Min, Changwoo and Ravindran, Binoy},
   booktitle={Proceedings of the 15th ACM SIGPLAN/SIGOPS International Conference on Virtual Execution Environments},
   pages={59--73},
-  year={2019}
+  year={2019},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
+
 @inproceedings{yu2017web,
-  title={Web service appliance based on unikernel},
   author={Yu, Kai and Zhang, Chengfei and Zhao, Yunxiang},
-  booktitle={2017 IEEE 37th International Conference on Distributed Computing Systems Workshops (ICDCSW)},
-  pages={280--282},
+  booktitle={2017 IEEE 37th International Conference on Distributed Computing Systems Workshops (ICDCSW)}, 
+  title={Web Service Appliance Based on Unikernel}, 
   year={2017},
-  organization={IEEE}
+  volume={},
+  number={},
+  pages={280-282},
+  keywords={Servers;Cloud computing;Kernel;Virtual machine monitors;Sockets;Unikernel;Mini-OS;Web service appliance},
+  doi={10.1109/ICDCSW.2017.38}
 }
 
 @inproceedings{zhou2023userspace,
@@ -486,48 +598,72 @@
   author={Zhou, Zhe and Bi, Yanxiang and Wan, Junpeng and Zhou, Yangfan and Li, Zhou},
   booktitle={17th USENIX Symposium on Operating Systems Design and Implementation (OSDI 23)},
   pages={33--49},
-  year={2023}
+  year={2023},
+  address = {Boston, MA},
+  publisher = {USENIX Association}
 }
 
 @inproceedings{jeong2014mtcp,
-  title={$\{$mTCP$\}$: a highly scalable user-level $\{$TCP$\}$ stack for multicore systems},
-  author={Jeong, EunYoung and Wood, Shinae and Jamshed, Muhammad and Jeong, Haewon and Ihm, Sunghwan and Han, Dongsu and Park, KyoungSoo},
-  booktitle={11th USENIX Symposium on Networked Systems Design and Implementation (NSDI 14)},
-  pages={489--502},
-  year={2014}
+author = {Jeong, Eun Young and Woo, Shinae and Jamshed, Muhammad and Jeong, Haewon and Ihm, Sunghwan and Han, Dongsu and Park, KyoungSoo},
+title = {mTCP: a highly scalable user-level TCP stack for multicore systems},
+year = {2014},
+isbn = {9781931971096},
+publisher = {USENIX Association},
+address = {USA},
+booktitle = {Proceedings of the 11th USENIX Conference on Networked Systems Design and Implementation},
+pages = {489–502},
+numpages = {14},
+location = {Seattle, WA},
+series = {NSDI'14}
 }
+
 
 @inproceedings{yang2017spdk,
-  title={SPDK: A development kit to build high performance storage applications},
-  author={Yang, Ziye and Harris, James R and Walker, Benjamin and Verkamp, Daniel and Liu, Changpeng and Chang, Cunyin and Cao, Gang and Stern, Jonathan and Verma, Vishal and Paul, Luse E},
-  booktitle={2017 IEEE International Conference on Cloud Computing Technology and Science (CloudCom)},
-  pages={154--161},
+  author={Yang, Ziye and Harris, James R. and Walker, Benjamin and Verkamp, Daniel and Liu, Changpeng and Chang, Cunyin and Cao, Gang and Stern, Jonathan and Verma, Vishal and Paul, Luse E.},
+  booktitle={2017 IEEE International Conference on Cloud Computing Technology and Science (CloudCom)}, 
+  title={SPDK: A Development Kit to Build High Performance Storage Applications}, 
   year={2017},
-  organization={IEEE}
-}
+  volume={},
+  number={},
+  pages={154-161},
+  keywords={Kernel;Performance evaluation;Nonvolatile memory;Libraries;Hardware;Inductors;User space NVMe driver;asynchronous polled mode driven I/O;High performance storage application},
+  doi={10.1109/CloudCom.2017.14}}
+
 
 @inproceedings{soares2010flexsc,
-  title={$\{$FlexSC$\}$: Flexible system call scheduling with $\{$Exception-Less$\}$ system calls},
-  author={Soares, Livio and Stumm, Michael},
-  booktitle={9th USENIX Symposium on Operating Systems Design and Implementation (OSDI 10)},
-  year={2010}
+author = {Soares, Livio and Stumm, Michael},
+title = {FlexSC: flexible system call scheduling with exception-less system calls},
+year = {2010},
+publisher = {USENIX Association},
+address = {USA},
+booktitle = {Proceedings of the 9th USENIX Conference on Operating Systems Design and Implementation},
+pages = {33–46},
+numpages = {14},
+location = {Vancouver, BC, Canada},
+series = {OSDI'10}
 }
 
 @inproceedings{nassif2022sapphire,
-  title={Sapphire rapids: The next-generation intel xeon scalable processor},
-  author={Nassif, Nevine and Munch, Ashley O and Molnar, Carleton L and Pasdast, Gerald and Lyer, Sitaraman V and Yang, Zibing and Mendoza, Oscar and Huddart, Mark and Venkataraman, Srikrishnan and Kandula, Sireesha and others},
-  booktitle={2022 IEEE International Solid-State Circuits Conference (ISSCC)},
-  volume={65},
-  pages={44--46},
+  author={Nassif, Nevine and Munch, Ashley O. and Molnar, Carleton L. and Pasdast, Gerald and Lyer, Sitaraman V. and Yang, Zibing and Mendoza, Oscar and Huddart, Mark and Venkataraman, Srikrishnan and Kandula, Sireesha and Marom, Rafi and Kern, Alexandra M. and Bowhill, Bill and Mulvihill, David R. and Nimmagadda, Srikanth and Kalidindi, Varma and Krause, Jonathan and Haq, Mohammad M. and Sharma, Roopali and Duda, Kevin},
+  booktitle={2022 IEEE International Solid-State Circuits Conference (ISSCC)}, 
+  title={Sapphire Rapids: The Next-Generation Intel Xeon Scalable Processor}, 
   year={2022},
-  organization={IEEE}
+  volume={65},
+  number={},
+  pages={44-46},
+  keywords={Power system management;Conferences;Metals;Integrated circuit interconnections;Routing;Delays;Transistors},
+  doi={10.1109/ISSCC42614.2022.9731107}
 }
 
 @misc{RISCVPrivileged2020,
-  author = "{The risc-v instruction set manual}",
-  title = "Volume II: Privileged architecture, document version 1.12",
+  author       = {RISC-V International},
+  title        = {The RISC-V Instruction Set Manual, Volume II: Privileged Architecture, Document Version 1.12},
   howpublished = {\url{https://github.com/riscv/riscv-isa-manual/releases/download/draft20200212-c3d1f07/riscv-privileged.pdf}},
-  year = "2020"
+  year         = {2020},
+  publisher    = {RISC-V International},
+  address      = {Zurich, Switzerland},
+  note         = {Accessed: 2023-01-01},
+  urldate      = {2023-01-01}
 }
 
 @inproceedings{levy2015ownership,
@@ -535,7 +671,9 @@
   author={Levy, Amit and Andersen, Michael P and Campbell, Bradford and Culler, David and Dutta, Prabal and Ghena, Branden and Levis, Philip and Pannuto, Pat},
   booktitle={Proceedings of the 8th Workshop on Programming Languages and Operating Systems},
   pages={21--26},
-  year={2015}
+  year={2015},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @inproceedings{balasubramanian2017system,
@@ -543,7 +681,9 @@
   author={Balasubramanian, Abhiram and Baranowski, Marek S and Burtsev, Anton and Panda, Aurojit and Rakamari{\'c}, Zvonimir and Ryzhyk, Leonid},
   booktitle={Proceedings of the 16th workshop on hot topics in operating systems},
   pages={156--161},
-  year={2017}
+  year={2017},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
 }
 
 @misc{sel4DesignPrinciples,
@@ -551,6 +691,6 @@
   author = {Microkernel Dude},
   url = {https://microkerneldude.org/2020/03/11/sel4-design-principles/},
   year = {2020},
-  note = {Accessed [Access Date, if applicable]}
+  note = {Accessed [Access Date, if applicable]},
 }
 
