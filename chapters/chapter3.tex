@@ -15,7 +15,7 @@ ReL4是基于Rust语言实现的高性能异步微内核，其在保持与seL4�
 最后，针对低并发场景的性能优化，ReL4引入了TAIC（Thread-Aware Interrupt Controller）硬件加速单元。该单元基于用户态中断实现调度器加速，将调度器的唤醒操作卸载到硬件上。这种硬件软件协同设计使得系统在各类工作负载下都能保持优异的性能表现。
 \begin{figure*}[htbp]
   \centering
-  \includegraphics{figures/ReL4_framework.drawio.pdf}
+  \includegraphics{figures/ReL4_framework.pdf}
   \caption{ReL4的系统架构图}\label{fig:ReL4_framework}
 \end{figure*}
 
@@ -36,7 +36,7 @@ ReL4将整个系统中的通知机制按照收发双方的特权级进行分类�
 
 \begin{figure*}[htbp]
   \centering
-  \includegraphics[width=1.0\textwidth]{figures/uintr_for_ntfn.drawio.pdf}
+  \includegraphics[width=1.0\textwidth]{figures/uintr_for_ntfn.pdf}
   \caption{U-notification设计架构图}\label{fig:u-notification}
 \end{figure*}
 
@@ -76,7 +76,7 @@ ReL4设计的混合轮询机制通过动态感知系统负载特征，在中断�
 
 \begin{figure*}[htbp]
   \centering
-  \includegraphics[width=1.0\textwidth]{figures/IPCItem.drawio.pdf}
+  \includegraphics[width=1.0\textwidth]{figures/IPCItem.pdf}
   \caption{共享缓冲区的结构图}\label{fig:ipcitem}
 \end{figure*}
 
@@ -98,7 +98,7 @@ ReL4的调度器架构采用了分布式设计理念，各进程调度器保持�
 
 \begin{figure*}[htbp]
   \centering
-  \includegraphics[width=1.0\textwidth]{figures/TAIC.drawio.pdf}
+  \includegraphics[width=1.0\textwidth]{figures/TAIC.pdf}
   \caption{调度器的结构图}\label{fig:executor}
 \end{figure*}
 
